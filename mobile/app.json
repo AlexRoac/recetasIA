@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "RecetAI",
+    "slug": "recetai",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "RecetAI usa la camara para fotografiar ingredientes.",
+        "NSPhotoLibraryUsageDescription": "RecetAI usa tus fotos para seleccionar imagenes de ingredientes."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "RecetAI usa tus fotos para seleccionar imagenes de ingredientes.",
+          "cameraPermission": "RecetAI usa la camara para fotografiar ingredientes.",
+          "microphonePermission": false
+        }
+      ]
+    ],
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

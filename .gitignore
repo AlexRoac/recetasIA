@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+.venv/
+venv/
+mobile/node_modules/
+mobile/.expo/
+mobile/dist/
+mobile/dist-verify/
+mobile/dist-verify-sdk54/
+mobile/npm-debug.log*
