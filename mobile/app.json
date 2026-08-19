@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
@@ -30,7 +30,9 @@
           "cameraPermission": "RecetAI usa la camara para fotografiar ingredientes.",
           "microphonePermission": false
         }
-      ]
+      ],
+      "expo-status-bar",
+      "expo-font"
     ],
     "web": {
       "favicon": "./assets/favicon.png"
