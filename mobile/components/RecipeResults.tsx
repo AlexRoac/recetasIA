@@ -81,6 +81,28 @@ function RecetaCard({ receta, index }: { receta: Receta; index: number }) {
         </View>
       ) : null}
 
+      {receta.nutricion.length > 0 ? (
+        <View style={styles.subsection}>
+          <Text style={[styles.subsectionLabel, { color: theme.textSecondary }]}>
+            Nutricion aproximada
+          </Text>
+          <View style={styles.nutritionList}>
+            {receta.nutricion.map((item) => (
+              <View
+                key={item}
+                style={[
+                  styles.nutritionItem,
+                  { backgroundColor: theme.surfaceSubtle, borderColor: theme.border },
+                ]}
+              >
+                <Ionicons name="analytics-outline" size={14} color={theme.accent} />
+                <Text style={[styles.nutritionText, { color: theme.textPrimary }]}>{item}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      ) : null}
+
       {receta.preparacion.length > 0 ? (
         <View style={styles.subsection}>
           <Text style={[styles.subsectionLabel, { color: theme.textSecondary }]}>Preparación</Text>
@@ -220,6 +242,25 @@ const styles = StyleSheet.create({
   subsectionBody: {
     fontSize: 14,
     lineHeight: 20,
+  },
+  nutritionList: {
+    gap: 8,
+  },
+  nutritionItem: {
+    minHeight: 34,
+    borderRadius: 10,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  nutritionText: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '600',
   },
   step: {
     flexDirection: 'row',

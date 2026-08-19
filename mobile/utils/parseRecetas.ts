@@ -2,6 +2,7 @@ export type Receta = {
   titulo: string;
   ingredientes: string[];
   ingredientesAdicionales: string[];
+  nutricion: string[];
   preparacion: string[];
 };
 
@@ -46,16 +47,22 @@ export function parsearRecetas(markdown: string): RecetasParseadas | null {
       titulo: recetaMatch[1].trim() || titulo,
       ingredientes: [],
       ingredientesAdicionales: [],
+      nutricion: [],
       preparacion: [],
     };
 
     for (const sub of subsecciones) {
       const subTituloMatch = sub.match(/^###\s+(.+)/);
       if (!subTituloMatch) continue;
-      const subTitulo = subTituloMatch[1].toLowerCase();
+      const subTitulo = subTituloMatch[1]
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
 
       if (subTitulo.includes('adicional')) {
         receta.ingredientesAdicionales = extraerLista(sub);
+      } else if (subTitulo.includes('nutricion')) {
+        receta.nutricion = extraerLista(sub);
       } else if (subTitulo.includes('ingrediente')) {
         receta.ingredientes = extraerLista(sub);
       } else if (subTitulo.includes('preparaci')) {

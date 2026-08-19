@@ -58,6 +58,13 @@ Responde en Markdown con esta estructura:
 ### Ingredientes
 - Ingredientes detectados usados
 
+### Nutricion aproximada
+- Calorias: aprox. X kcal por porcion
+- Carbohidratos: aprox. X g
+- Proteina: aprox. X g
+- Grasas: aprox. X g
+- Fibra: aprox. X g
+
 ### Preparacion
 1. Paso a paso claro y breve
 
@@ -68,8 +75,20 @@ Responde en Markdown con esta estructura:
 ### Ingredientes adicionales
 - Ingredientes basicos adicionales
 
+### Nutricion aproximada
+- Calorias: aprox. X kcal por porcion
+- Carbohidratos: aprox. X g
+- Proteina: aprox. X g
+- Grasas: aprox. X g
+- Fibra: aprox. X g
+
 ### Preparacion
 1. Paso a paso claro y breve
+
+Las cifras de nutricion deben ser estimaciones practicas, no valores exactos.
+Si algun elemento relevante aplica por los ingredientes visibles o adicionales
+(por ejemplo sodio, azucares o grasas saturadas), puedes incluirlo como punto
+extra dentro de "Nutricion aproximada".
 """
 
 
