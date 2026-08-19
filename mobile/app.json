@@ -31,7 +31,6 @@
           "microphonePermission": false
         }
       ],
-      "expo-status-bar",
       "expo-font"
     ],
     "web": {
