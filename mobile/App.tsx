@@ -10,16 +10,21 @@ import PrimaryButton from './components/PrimaryButton';
 import RecipeResults from './components/RecipeResults';
 import ResultSkeleton from './components/ResultSkeleton';
 import { useTheme } from './theme';
-import { ImagenSeleccionada } from './types';
+import { ImagenSeleccionada, ResultadoRecetas } from './types';
 
 const API_BASE_URL = (process.env.EXPO_PUBLIC_RECETAI_API_URL ?? 'http://127.0.0.1:8000')
   .trim()
   .replace(/\/$/, '');
 
+type RecetAIResponse = {
+  resultado?: ResultadoRecetas | string;
+  detail?: string;
+};
+
 export default function App() {
   const theme = useTheme();
   const [imagen, setImagen] = useState<ImagenSeleccionada | null>(null);
-  const [resultado, setResultado] = useState('');
+  const [resultado, setResultado] = useState<ResultadoRecetas | string | null>(null);
   const [cargando, setCargando] = useState(false);
 
   async function elegirImagen() {
@@ -37,14 +42,14 @@ export default function App() {
 
     if (!seleccion.canceled) {
       setImagen(seleccion.assets[0]);
-      setResultado('');
+      setResultado(null);
     }
   }
 
   async function tomarFoto() {
     const permiso = await ImagePicker.requestCameraPermissionsAsync();
     if (!permiso.granted) {
-      Alert.alert('Permiso requerido', 'RecetAI necesita acceder a la cámara.');
+      Alert.alert('Permiso requerido', 'RecetAI necesita acceder a la camara.');
       return;
     }
 
@@ -56,13 +61,13 @@ export default function App() {
 
     if (!captura.canceled) {
       setImagen(captura.assets[0]);
-      setResultado('');
+      setResultado(null);
     }
   }
 
   function quitarImagen() {
     setImagen(null);
-    setResultado('');
+    setResultado(null);
   }
 
   async function procesarImagen() {
@@ -89,20 +94,20 @@ export default function App() {
 
     try {
       setCargando(true);
-      setResultado('');
+      setResultado(null);
 
       const respuesta = await fetch(`${API_BASE_URL}/recetas`, {
         method: 'POST',
         body: formData,
       });
 
-      const datos = await respuesta.json();
+      const datos = (await respuesta.json()) as RecetAIResponse;
 
       if (!respuesta.ok) {
         throw new Error(datos.detail ?? 'No se pudo procesar la imagen.');
       }
 
-      setResultado(datos.resultado ?? 'No se recibió una respuesta.');
+      setResultado(datos.resultado ?? 'No se recibio una respuesta.');
     } catch (error) {
       const mensaje = error instanceof Error ? error.message : String(error);
       setResultado(`Error al consultar RecetAI: ${mensaje}`);
@@ -128,7 +133,7 @@ export default function App() {
 
           <PrimaryButton
             label="Generar recetas"
-            loadingLabel="Analizando ingredientes..."
+            loadingLabel="Preparando resultados..."
             icon="sparkles"
             onPress={procesarImagen}
             disabled={!imagen}

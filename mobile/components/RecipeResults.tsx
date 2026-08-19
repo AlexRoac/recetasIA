@@ -1,12 +1,29 @@
 import { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, Image, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { shadow, useTheme } from '../theme';
-import { parsearRecetas, Receta } from '../utils/parseRecetas';
+import { ResultadoRecetas } from '../types';
+import { parsearRecetas } from '../utils/parseRecetas';
 
 type Props = {
-  resultado: string;
+  resultado: ResultadoRecetas | string;
+};
+
+type RecetaView = {
+  titulo: string;
+  ingredientes: string[];
+  ingredientesAdicionales: string[];
+  preparacion: string[];
+  imagenUrl?: string | null;
+  imagenError?: string | null;
+};
+
+type ResultadoView = {
+  mensaje: string;
+  ingredientesDetectados: string[];
+  recetas: RecetaView[];
+  error: boolean;
 };
 
 function useEntranceAnimation(delay: number) {
@@ -31,6 +48,60 @@ function useEntranceAnimation(delay: number) {
   };
 }
 
+function esResultadoRecetas(valor: ResultadoRecetas | string): valor is ResultadoRecetas {
+  return typeof valor === 'object' && Array.isArray(valor.recetas);
+}
+
+function normalizarResultado(resultado: ResultadoRecetas | string): ResultadoView | null {
+  if (esResultadoRecetas(resultado)) {
+    return {
+      mensaje: resultado.mensaje ?? '',
+      ingredientesDetectados: resultado.ingredientes_detectados ?? [],
+      recetas: (resultado.recetas ?? []).map((receta) => ({
+        titulo: receta.titulo,
+        ingredientes: receta.ingredientes ?? [],
+        ingredientesAdicionales: receta.ingredientes_adicionales ?? [],
+        preparacion: receta.preparacion ?? [],
+        imagenUrl: receta.imagen_url,
+        imagenError: receta.imagen_error,
+      })),
+      error: Boolean(resultado.error),
+    };
+  }
+
+  const texto = resultado.trim();
+  if (/^error/i.test(texto)) {
+    return {
+      mensaje: texto,
+      ingredientesDetectados: [],
+      recetas: [],
+      error: true,
+    };
+  }
+
+  const parsed = parsearRecetas(texto);
+  if (!parsed) {
+    return {
+      mensaje: texto,
+      ingredientesDetectados: [],
+      recetas: [],
+      error: false,
+    };
+  }
+
+  return {
+    mensaje: '',
+    ingredientesDetectados: parsed.ingredientesDetectados,
+    recetas: parsed.recetas.map((receta) => ({
+      titulo: receta.titulo,
+      ingredientes: receta.ingredientes,
+      ingredientesAdicionales: receta.ingredientesAdicionales,
+      preparacion: receta.preparacion,
+    })),
+    error: false,
+  };
+}
+
 function Chip({ text }: { text: string }) {
   const theme = useTheme();
   return (
@@ -40,7 +111,32 @@ function Chip({ text }: { text: string }) {
   );
 }
 
-function RecetaCard({ receta, index }: { receta: Receta; index: number }) {
+function ImagenReceta({ receta }: { receta: RecetaView }) {
+  const theme = useTheme();
+
+  if (receta.imagenUrl) {
+    return (
+      <View style={[styles.imageFrame, { backgroundColor: theme.surfaceSubtle }]}>
+        <Image source={{ uri: receta.imagenUrl }} style={styles.recipeImage} resizeMode="cover" />
+      </View>
+    );
+  }
+
+  if (receta.imagenError) {
+    return (
+      <View style={[styles.imageFallback, { backgroundColor: theme.surfaceSubtle }]}>
+        <Ionicons name="image-outline" size={18} color={theme.textSecondary} />
+        <Text style={[styles.imageFallbackText, { color: theme.textSecondary }]}>
+          Imagen no disponible
+        </Text>
+      </View>
+    );
+  }
+
+  return null;
+}
+
+function RecetaCard({ receta, index }: { receta: RecetaView; index: number }) {
   const theme = useTheme();
   const animatedStyle = useEntranceAnimation(120 * index);
 
@@ -53,6 +149,8 @@ function RecetaCard({ receta, index }: { receta: Receta; index: number }) {
         animatedStyle,
       ]}
     >
+      <ImagenReceta receta={receta} />
+
       <View style={styles.cardHeader}>
         <View style={[styles.badge, { backgroundColor: theme.accent }]}>
           <Text style={styles.badgeText}>{index}</Text>
@@ -76,14 +174,14 @@ function RecetaCard({ receta, index }: { receta: Receta; index: number }) {
             Ingredientes adicionales
           </Text>
           <Text style={[styles.subsectionBody, { color: theme.textSecondary }]}>
-            {receta.ingredientesAdicionales.join(' · ')}
+            {receta.ingredientesAdicionales.join(', ')}
           </Text>
         </View>
       ) : null}
 
       {receta.preparacion.length > 0 ? (
         <View style={styles.subsection}>
-          <Text style={[styles.subsectionLabel, { color: theme.textSecondary }]}>Preparación</Text>
+          <Text style={[styles.subsectionLabel, { color: theme.textSecondary }]}>Preparacion</Text>
           {receta.preparacion.map((paso, i) => (
             <View key={i} style={styles.step}>
               <Text style={[styles.stepNumber, { color: theme.accent }]}>{i + 1}</Text>
@@ -98,11 +196,14 @@ function RecetaCard({ receta, index }: { receta: Receta; index: number }) {
 
 export default function RecipeResults({ resultado }: Props) {
   const theme = useTheme();
-  const esError = /^error/i.test(resultado.trim());
-  const parsed = !esError ? parsearRecetas(resultado) : null;
+  const parsed = normalizarResultado(resultado);
   const containerStyle = useEntranceAnimation(0);
 
-  if (esError) {
+  if (!parsed) {
+    return null;
+  }
+
+  if (parsed.error) {
     return (
       <Animated.View
         style={[
@@ -112,12 +213,12 @@ export default function RecipeResults({ resultado }: Props) {
         ]}
       >
         <Ionicons name="alert-circle-outline" size={18} color={theme.danger} />
-        <Text style={[styles.errorText, { color: theme.danger }]}>{resultado}</Text>
+        <Text style={[styles.errorText, { color: theme.danger }]}>{parsed.mensaje}</Text>
       </Animated.View>
     );
   }
 
-  if (!parsed) {
+  if (parsed.mensaje && parsed.recetas.length === 0) {
     return (
       <Animated.View
         style={[
@@ -126,7 +227,7 @@ export default function RecipeResults({ resultado }: Props) {
           containerStyle,
         ]}
       >
-        <Text style={[styles.plainText, { color: theme.textPrimary }]}>{resultado}</Text>
+        <Text style={[styles.plainText, { color: theme.textPrimary }]}>{parsed.mensaje}</Text>
       </Animated.View>
     );
   }
@@ -171,6 +272,26 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 20,
     gap: 12,
+  },
+  imageFrame: {
+    aspectRatio: 4 / 3,
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  recipeImage: {
+    width: '100%',
+    height: '100%',
+  },
+  imageFallback: {
+    minHeight: 76,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  imageFallbackText: {
+    fontSize: 12,
+    fontWeight: '700',
   },
   cardHeader: {
     flexDirection: 'row',

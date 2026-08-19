@@ -1,4 +1,4 @@
-google-genai
+google-genai>=2.18.1
 gradio
 Pillow
 python-dotenv

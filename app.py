@@ -1,10 +1,20 @@
 import gradio as gr
 
-from recetai_core import recomendar_recetas
+from recetai_core import GENERATED_DIR, recomendar_recetas, resultado_a_markdown
 
 
-with gr.Blocks(title="🍳 RecetAI") as demo:
-    gr.Markdown("# 🍳 RecetAI")
+def recomendar_en_gradio(imagen):
+    resultado = recomendar_recetas(imagen)
+    imagenes = [
+        str(GENERATED_DIR / receta["imagen_archivo"])
+        for receta in resultado.get("recetas", [])
+        if receta.get("imagen_archivo")
+    ]
+    return resultado_a_markdown(resultado), imagenes
+
+
+with gr.Blocks(title="RecetAI") as demo:
+    gr.Markdown("# RecetAI")
 
     imagen = gr.Image(
         label="Sube una fotografia de tus ingredientes",
@@ -12,11 +22,12 @@ with gr.Blocks(title="🍳 RecetAI") as demo:
     )
     boton = gr.Button("Procesar imagen")
     resultado = gr.Markdown()
+    imagenes = gr.Gallery(label="Imagenes generadas", columns=2, height="auto")
 
     boton.click(
-        fn=recomendar_recetas,
+        fn=recomendar_en_gradio,
         inputs=imagen,
-        outputs=resultado,
+        outputs=[resultado, imagenes],
     )
 
 

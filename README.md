@@ -1,8 +1,9 @@
 # RecetAI
 
 RecetAI es una aplicacion sencilla en Python que recibe una imagen con
-ingredientes, la envia a Gemini y genera 3 recetas en espanol basadas
-principalmente en los ingredientes visibles. Tambien incluye una app movil en
+ingredientes, la envia a Gemini y genera 2 recetas en espanol basadas
+principalmente en los ingredientes visibles. Tambien puede generar imagenes del
+platillo recomendado cuando esa opcion esta activada. Incluye una app movil en
 React Native con Expo para usarla desde iOS y Android con Expo Go.
 
 ## Tecnologias utilizadas
@@ -61,10 +62,21 @@ referencia:
 
 ```text
 GEMINI_API_KEY=tu_api_key_aqui
+RECETAI_TEXT_MODEL=gemini-3.1-flash-lite
+RECETAI_GENERAR_IMAGENES=false
+RECETAI_IMAGE_MODEL=gemini-3.1-flash-lite-image
 ```
 
 Reemplaza `tu_api_key_aqui` por tu API key real de Gemini. No subas el archivo
 `.env` a GitHub.
+
+`RECETAI_GENERAR_IMAGENES=false` evita generar costos accidentales. El analisis
+de ingredientes y recetas puede usar free tier, pero la generacion de imagenes
+de Gemini usa paid tier. Cuando quieras probar imagenes, cambia:
+
+```text
+RECETAI_GENERAR_IMAGENES=true
+```
 
 ## Ejecucion
 
@@ -122,11 +134,11 @@ EXPO_PUBLIC_RECETAI_API_URL=http://TU_IP_LOCAL:8000
 ## Flujo de la aplicacion
 
 ```text
-Imagen -> Gemini -> deteccion de ingredientes -> generacion de recetas -> Gradio
+Imagen -> Gemini -> deteccion de ingredientes -> recetas -> imagenes opcionales -> Gradio
 ```
 
 En movil:
 
 ```text
-Imagen -> Expo Go -> FastAPI -> Gemini -> recetas -> Expo Go
+Imagen -> Expo Go -> FastAPI -> Gemini -> recetas + imagenes opcionales -> Expo Go
 ```

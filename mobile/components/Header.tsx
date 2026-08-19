@@ -33,7 +33,7 @@ export default function Header() {
       <View style={styles.texts}>
         <Text style={[styles.title, { color: theme.textPrimary }]}>RecetAI</Text>
         <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-          Sube una foto de tus ingredientes y recibe 3 recetas al instante.
+          Sube una foto de tus ingredientes y recibe recetas al instante.
         </Text>
       </View>
     </Animated.View>
