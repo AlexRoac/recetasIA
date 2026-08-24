@@ -130,3 +130,41 @@ En movil:
 ```text
 Imagen -> Expo Go -> FastAPI -> Gemini -> recetas -> Expo Go
 ```
+
+## Despliegue de demo
+
+Para un demo publico, publica el backend y el frontend por separado:
+
+1. Backend FastAPI en Render
+
+   - Sube este repositorio a GitHub.
+   - En Render, crea un Web Service desde el repositorio o usa `render.yaml`.
+   - Configura la variable de entorno `GEMINI_API_KEY` en Render. No subas `.env`.
+   - El comando de inicio es:
+
+   ```bash
+   uvicorn api:app --host 0.0.0.0 --port $PORT
+   ```
+
+   Cuando termine el deploy, prueba:
+
+   ```text
+   https://TU_BACKEND.onrender.com/health
+   ```
+
+2. Frontend web de Expo en Vercel
+
+   - En Vercel, importa el mismo repositorio.
+   - Usa `mobile` como Root Directory.
+   - Build Command: `npm run build`.
+   - Output Directory: `dist`.
+   - Agrega esta variable de entorno en Vercel:
+
+   ```text
+   EXPO_PUBLIC_RECETAI_API_URL=https://TU_BACKEND.onrender.com
+   ```
+
+   Vercel generara el sitio web a partir de la app Expo.
+
+Tambien puedes publicar solo la interfaz Gradio en Hugging Face Spaces o Render,
+pero para la app web/movil conviene mantener FastAPI como backend.
